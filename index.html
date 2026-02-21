@@ -1,278 +1,937 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>FBI Recruit Terminal</title>
-<style>
-body {
-  margin:0;
-  font-family: Courier New, monospace;
-  background:#000;
-  overflow:hidden;
-}
 
-/* CRT Scanlines */
-body::after {
-  content:"";
-  position:fixed;
-  inset:0;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.03),
-    rgba(255,255,255,0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  pointer-events:none;
-}
+    <meta charset="UTF-8">
 
-/* GLOBAL */
-section {
-  position:absolute;
-  inset:0;
-  display:none;
-}
-.show { display:block; }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-/* BOOT */
-#boot {
-  background:#05070a;
-  justify-content:center;
-  align-items:center;
-  display:flex;
-  flex-direction:column;
-  text-align:center;
-  animation:flicker 3s infinite;
-}
+    <title>FBI Recruit Terminal v2.3</title>
 
-@keyframes flicker {
-  0%,18%,22%,25%,53%,57%,100% { opacity:1; }
-  20%,24%,55% { opacity:.4; }
-}
+    <style>
 
-#boot .title {
-  font-size:40px;
-  color:#7cff7c;
-  text-shadow:0 0 10px #4aff4a;
-}
-#boot .subtitle {
-  font-size:22px;
-  margin-top:10px;
-  color:#7cff7c;
-}
-#boot .adl {
-  font-size:80px;
-  opacity:.08;
-  position:absolute;
-  bottom:20px;
-}
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-/* DASHBOARD */
-#dashboard {
-  background:#0b0f14;
-}
-.header {
-  padding:15px;
-  background:#0f141b;
-  border-bottom:1px solid #333;
-}
-.dashboard .folders {
-  display:flex;
-  justify-content:center;
-  gap:60px;
-  margin-top:80px;
-}
-.folder {
-  text-align:center;
-  cursor:pointer;
-  transition:all .3s;
-}
-.folder:hover {
-  transform:scale(1.2);
-  color:#7cff7c;
-}
-.folder img {
-  width:90px;
-}
-.status {
-  position:absolute;
-  bottom:0;
-  padding:10px;
-  background:#0f141b;
-  width:100%;
-}
 
-/* BOARD */
-#board {
-  background:url("board.jpg") center/cover no-repeat;
-}
-#board .backBtn {
-  position:absolute;
-  top:20px;
-  left:20px;
-  padding:8px 12px;
-  background:#111;
-  color:#7cff7c;
-  cursor:pointer;
-}
-.evidence {
-  position:absolute;
-  cursor:pointer;
-  transition:.3s;
-}
-.evidence:hover {
-  transform:scale(1.1);
-}
-.evidence img {
-  width:180px;
-  display:block;
-}
-.pin {
-  width:30px;
-  position:absolute;
-}
 
-/* MODAL */
-#modal {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.85);
-  justify-content:center;
-  align-items:center;
-}
-#modal img {
-  max-width:70%;
-}
-#closeBtn {
-  position:absolute;
-  top:30px;
-  right:40px;
-  font-size:32px;
-  cursor:pointer;
-  color:white;
-}
-</style>
+        :root {
+
+            --bg-dark: #050a0f;
+
+            --text-glow: #e0e6ed;
+
+            --muted-amber: #d49a37;
+
+            --terminal-green: #4af626;
+
+            --metal-gray: #4a4d52;
+
+            --metal-light: #7b8087;
+
+            --border-hard: #1a1c20;
+
+            --folder-yellow: #d4b856;
+
+        }
+
+
+
+        * {
+
+            box-sizing: border-box;
+
+            margin: 0;
+
+            padding: 0;
+
+            cursor: crosshair; /* Investigative pointer */
+
+            user-select: none;
+
+        }
+
+
+
+        body {
+
+            background-color: var(--bg-dark);
+
+            color: var(--text-glow);
+
+            font-family: 'VT323', monospace;
+
+            height: 100vh;
+
+            overflow: hidden;
+
+            position: relative;
+
+        }
+
+
+
+        /* --- CRT & VIGNETTE EFFECTS --- */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            top: 0; left: 0; width: 100vw; height: 100vh;
+
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+
+            background-size: 100% 4px, 6px 100%;
+
+            z-index: 999;
+
+            pointer-events: none;
+
+            opacity: 0.8;
+
+        }
+
+
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            top: 0; left: 0; width: 100vw; height: 100vh;
+
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+
+            z-index: 998;
+
+            pointer-events: none;
+
+        }
+
+
+
+        /* Flicker Animation */
+
+        @keyframes flicker {
+
+            0% { opacity: 0.95; }
+
+            5% { opacity: 0.85; }
+
+            10% { opacity: 0.95; }
+
+            15% { opacity: 1; }
+
+            50% { opacity: 0.98; }
+
+            100% { opacity: 0.9; }
+
+        }
+
+        .flicker-effect {
+
+            animation: flicker 0.15s infinite;
+
+        }
+
+
+
+        /* Glitch Transition */
+
+        .glitch-overlay {
+
+            position: fixed;
+
+            top: 0; left: 0; width: 100%; height: 100%;
+
+            background: white;
+
+            z-index: 1000;
+
+            mix-blend-mode: difference;
+
+            display: none;
+
+        }
+
+
+
+        /* --- SCREENS --- */
+
+        .screen {
+
+            display: none;
+
+            width: 100%; height: 100%;
+
+            position: absolute;
+
+            top: 0; left: 0;
+
+        }
+
+        .active-screen { display: block; }
+
+
+
+        /* --- BOOT SCREEN --- */
+
+        #boot-screen {
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            align-items: center;
+
+            text-align: center;
+
+            text-shadow: 0 0 5px var(--text-glow);
+
+        }
+
+        .boot-title { font-size: 2.5rem; letter-spacing: 2px; margin-bottom: 10px; }
+
+        .boot-sub { font-size: 1.5rem; margin-bottom: 40px; color: var(--muted-amber); }
+
+        .boot-auth { font-size: 1.2rem; border: 1px solid var(--text-glow); padding: 5px 15px; margin-bottom: 40px; }
+
+        .blink { animation: blinker 1s linear infinite; font-size: 1.2rem; }
+
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        
+
+        .progress-container {
+
+            width: 300px; border: 1px solid var(--text-glow); height: 20px; margin-top: 20px;
+
+            position: relative;
+
+        }
+
+        .progress-bar {
+
+            height: 100%; background: var(--text-glow); width: 0%;
+
+            transition: width 0.2s;
+
+        }
+
+
+
+        /* --- DASHBOARD --- */
+
+        #dashboard { background-color: #111418; }
+
+        .header-bar {
+
+            background: linear-gradient(to bottom, var(--metal-light), var(--metal-gray));
+
+            border-bottom: 3px solid var(--border-hard);
+
+            height: 60px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 0 20px;
+
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+
+        }
+
+        .header-title { color: #000; font-size: 1.8rem; font-weight: bold; text-shadow: 1px 1px 0px rgba(255,255,255,0.3); }
+
+        .seal { width: 40px; height: 40px; background: #000; border: 2px solid var(--muted-amber); border-radius: 50%; /* Only rounded thing allowed for a seal */ }
+
+
+
+        .folder-grid {
+
+            display: flex;
+
+            gap: 40px;
+
+            padding: 60px;
+
+            flex-wrap: wrap;
+
+        }
+
+        .folder-container {
+
+            display: flex; flex-direction: column; align-items: center; width: 120px;
+
+        }
+
+        .folder {
+
+            width: 100px; height: 75px;
+
+            background: var(--folder-yellow);
+
+            position: relative;
+
+            border: 2px solid #000;
+
+            box-shadow: inset -2px -2px 0px rgba(0,0,0,0.3), 4px 4px 0px rgba(0,0,0,0.8);
+
+            transition: transform 0.1s;
+
+        }
+
+        .folder::before {
+
+            content: ''; position: absolute; top: -12px; left: -2px;
+
+            width: 40px; height: 10px;
+
+            background: var(--folder-yellow);
+
+            border: 2px solid #000; border-bottom: none;
+
+        }
+
+        .folder-container:hover .folder { transform: translateY(-3px) scale(1.02); background: #e8cd6e; }
+
+        .folder-label { margin-top: 15px; background: #000; padding: 2px 5px; border: 1px solid var(--text-glow); font-size: 1.1rem; text-align: center; }
+
+
+
+        .status-bar {
+
+            position: absolute; bottom: 0; width: 100%;
+
+            background: var(--metal-gray); border-top: 2px solid var(--border-hard);
+
+            display: flex; justify-content: space-between; padding: 5px 20px;
+
+            color: #000; font-weight: bold; font-size: 1.1rem;
+
+        }
+
+
+
+        /* --- PERSONS OF INTEREST --- */
+
+        #poi-screen { background-color: #111418; padding: 80px 40px; overflow-y: auto; }
+
+        .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+
+        .dossier {
+
+            background: #e6e4df; color: #000;
+
+            border: 2px solid #000; padding: 20px;
+
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1), 5px 5px 0px rgba(0,0,0,0.9);
+
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+
+        }
+
+        .dossier h2 { border-bottom: 2px solid #000; margin-bottom: 10px; font-size: 2rem; }
+
+        .threat-high { color: #8a0303; font-weight: bold; }
+
+        .threat-med { color: #a86c00; font-weight: bold; }
+
+        .stamp {
+
+            color: rgba(138, 3, 3, 0.4); border: 4px solid rgba(138, 3, 3, 0.4);
+
+            font-size: 3rem; transform: rotate(-15deg); position: absolute; pointer-events: none;
+
+        }
+
+        
+
+        /* Navigation Buttons */
+
+        .back-btn {
+
+            position: absolute; top: 75px; left: 20px;
+
+            background: #000; color: var(--text-glow); border: 2px solid var(--text-glow);
+
+            padding: 5px 15px; font-family: 'VT323'; font-size: 1.2rem;
+
+            z-index: 100;
+
+        }
+
+        .back-btn:hover { background: var(--text-glow); color: #000; }
+
+
+
+        /* --- EVIDENCE BOARD --- */
+
+        #evidence-screen {
+
+            background: #2b1f14; /* Base cork color */
+
+            background-image: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.8) 100%), 
+
+                              url('https://www.transparenttextures.com/patterns/cork-board.png');
+
+            overflow: hidden;
+
+            position: relative;
+
+        }
+
+        
+
+        .evidence-item {
+
+            position: absolute;
+
+            background: #fff;
+
+            padding: 10px 10px 30px 10px; /* Polaroid style */
+
+            border: 1px solid #ccc;
+
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
+
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+
+            z-index: 10;
+
+        }
+
+        
+
+        /* Note: Swap the src attributes below with your lo-fi flash photography */
+
+        .evidence-item img {
+
+            width: 150px; height: 150px; object-fit: cover; filter: grayscale(100%) contrast(1.2);
+
+        }
+
+        .evidence-item:hover { transform: scale(1.05) rotate(0deg) !important; z-index: 100; box-shadow: 10px 10px 25px rgba(0,0,0,0.9); }
+
+        
+
+        .zoomed {
+
+            top: 50% !important; left: 50% !important;
+
+            transform: translate(-50%, -50%) scale(2.5) !important;
+
+            z-index: 1000 !important;
+
+        }
+
+        
+
+        .darken-bg {
+
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+
+            background: rgba(0,0,0,0.8); z-index: 500; display: none;
+
+        }
+
+
+
+        .pushpin {
+
+            width: 12px; height: 12px; border-radius: 50%;
+
+            position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+
+            z-index: 11;
+
+        }
+
+        .pin-red { background: radial-gradient(circle at 30% 30%, #ff4d4d, #8a0303); }
+
+        .pin-green { background: radial-gradient(circle at 30% 30%, #4dff4d, #038a03); }
+
+
+
+        /* SVG Red Strings */
+
+        #red-strings {
+
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none;
+
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7));
+
+        }
+
+        .string { stroke: #c1121f; stroke-width: 2; fill: none; }
+
+    </style>
+
 </head>
 
-<body>
+<body class="flicker-effect">
 
-<!-- BOOT -->
-<section id="boot" class="show">
-  <div class="title">FEDERAL BUREAU OF INVESTIGATION</div>
-  <div class="subtitle">RECRUIT ACCESS TERMINAL v2.3</div>
-  <div class="subtitle">AUTHORIZED PERSONNEL ONLY</div>
-  <div class="subtitle">Press ENTER to Continue</div>
-  <div class="adl">ADL</div>
-</section>
 
-<!-- DASHBOARD -->
-<section id="dashboard">
-  <div class="header">F.B.I. RECRUIT OPERATIONS CENTER</div>
-  <div class="folders">
-    <div class="folder" onclick="showBoard()">
-      <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png">
-      EVIDENCE
+
+    <div class="glitch-overlay" id="glitch"></div>
+
+
+
+    <div id="boot-screen" class="screen active-screen">
+
+        <div class="boot-title">FEDERAL BUREAU OF INVESTIGATION</div>
+
+        <div class="boot-sub">RECRUIT ACCESS TERMINAL v2.3</div>
+
+        <div class="boot-auth">AUTHORIZED PERSONNEL ONLY</div>
+
+        <div class="blink" id="enter-text">Press ENTER to Continue</div>
+
+        
+
+        <div class="progress-container" style="display: none;" id="loading-container">
+
+            <div class="progress-bar" id="progress"></div>
+
+        </div>
+
+        <div id="loading-text" style="display: none; margin-top: 10px; font-size: 0.9rem;">SECURE SYSTEM INITIALIZING...</div>
+
     </div>
-    <div class="folder" onclick="alert('Case Files coming soon')">
-      <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png">
-      CASE FILES
+
+
+
+    <div id="dashboard" class="screen">
+
+        <div class="header-bar">
+
+            <div class="header-title">F.B.I. RECRUIT OPERATIONS CENTER</div>
+
+            <div class="seal"></div>
+
+        </div>
+
+        
+
+        <div class="folder-grid">
+
+            <div class="folder-container">
+
+                <div class="folder"></div>
+
+                <div class="folder-label">CASE FILES</div>
+
+            </div>
+
+            <div class="folder-container">
+
+                <div class="folder"></div>
+
+                <div class="folder-label">INTERNAL MEMOS</div>
+
+            </div>
+
+            <div class="folder-container" onclick="navigate('poi-screen')">
+
+                <div class="folder"></div>
+
+                <div class="folder-label">PERSONS OF INTEREST</div>
+
+            </div>
+
+            <div class="folder-container">
+
+                <div class="folder"></div>
+
+                <div class="folder-label">ACTIVE INVESTIGATIONS</div>
+
+            </div>
+
+            <div class="folder-container" onclick="navigate('evidence-screen')">
+
+                <div class="folder"></div>
+
+                <div class="folder-label">EVIDENCE BOARD</div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="status-bar">
+
+            <span>USER: ROOKIE_032</span>
+
+            <span>LAST LOGIN: 02/17/2006</span>
+
+            <span>ACCESS LEVEL: RESTRICTED</span>
+
+        </div>
+
     </div>
-    <div class="folder" onclick="alert('Persons coming soon')">
-      <img src="https://cdn-icons-png.flaticon.com/512/1250/1250920.png">
-      PERSONS
+
+
+
+    <div id="poi-screen" class="screen">
+
+        <button class="back-btn" onclick="navigate('dashboard')">[ ESC ] RETURN</button>
+
+        <div class="header-bar" style="position: absolute; top:0; left:0; width:100%;">
+
+            <div class="header-title">RESTRICTED: PERSONS OF INTEREST</div>
+
+        </div>
+
+        <div class="stamp" style="top: 150px; right: 100px;">CONFIDENTIAL</div>
+
+        
+
+        <div class="dossier-grid" style="margin-top: 20px;">
+
+            <div class="dossier" style="position: relative;">
+
+                <h2>NOAH OLIVIER SMITH</h2>
+
+                <p><strong>Alias:</strong> "The Boss"</p>
+
+                <p><strong>Role:</strong> Organizational Head</p>
+
+                <p><strong>Threat Level:</strong> <span class="threat-high">HIGH</span></p>
+
+                <br>
+
+                <p>Primary decision-maker and strategic authority within the organization. Exercises control over all operational branches and maintains insulated communication channels. Rarely appears publicly. All directives are believed to originate from him.</p>
+
+            </div>
+
+            <div class="dossier">
+
+                <h2>LUH YONI (YBG)</h2>
+
+                <p><strong>Alias:</strong> YBG</p>
+
+                <p><strong>Role:</strong> Executive Security Detail</p>
+
+                <p><strong>Threat Level:</strong> <span class="threat-high">HIGH</span></p>
+
+                <br>
+
+                <p>Serves as primary security enforcer and personal protector to The Boss. Controls physical access and movement within inner-circle operations. Known for maintaining tight perimeter security. Direct contact with the Boss is unlikely without passing through him.</p>
+
+            </div>
+
+            <div class="dossier">
+
+                <h2>BNYX®</h2>
+
+                <p><strong>Role:</strong> Captain</p>
+
+                <p><strong>Threat Level:</strong> <span class="threat-med">MEDIUM</span></p>
+
+                <br>
+
+                <p>Oversees mid-level operations and coordinates activity between internal divisions. Acts as a liaison between leadership and field associates. Involved in strategic planning and resource allocation.</p>
+
+            </div>
+
+            <div class="dossier">
+
+                <h2>ZB</h2>
+
+                <p><strong>Role:</strong> Captain</p>
+
+                <p><strong>Threat Level:</strong> <span class="threat-med">MEDIUM</span></p>
+
+                <br>
+
+                <p>Responsible for managing regional operational activity. Maintains communication with multiple associates and oversees execution of assigned directives. Reports directly to upper leadership.</p>
+
+            </div>
+
+        </div>
+
     </div>
-  </div>
-  <div class="status">USER: ROOKIE_032 | LAST LOGIN: 02/17/2006 | ACCESS LEVEL: RESTRICTED</div>
-</section>
 
-<!-- EVIDENCE BOARD -->
-<section id="board">
-  <div class="backBtn" onclick="backToDashboard()">« BACK</div>
 
-  <!-- STRING SVG -->
-  <svg style="position:absolute; width:100%; height:100%;">
-    <path d="M300 200 C 500 300, 600 350, 750 400" stroke="red" stroke-width="3" fill="none"/>
-    <path d="M750 400 C 600 550, 450 600, 500 550" stroke="red" stroke-width="3" fill="none"/>
-  </svg>
 
-  <!-- Evidence Items -->
-  <div class="evidence" style="top:150px; left:240px;">
-    <img src="Noah_Olivier_Smith.jpg">
-    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
-  </div>
+    <div id="evidence-screen" class="screen">
 
-  <div class="evidence" style="top:350px; left:680px;">
-    <img src="Luh_Yoni.jpg">
-    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
-  </div>
+        <button class="back-btn" onclick="navigate('dashboard')">[ ESC ] RETURN</button>
 
-  <div class="evidence" style="top:520px; left:420px;">
-    <img src="BNYX.jpg">
-    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
-  </div>
+        <div class="darken-bg" id="darken-bg"></div>
 
-  <div class="evidence" style="top:250px; left:480px;">
-    <img src="ZB.jpg">
-    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
-  </div>
+        
 
-  <div class="evidence" style="top:170px; left:580px;">
-    <img src="placeholder1.jpg">
-    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
-  </div>
+        <svg id="red-strings">
 
-  <div class="evidence" style="top:420px; left:300px;">
-    <img src="placeholder2.jpg">
-    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
-  </div>
+            <path class="string" id="string1" d="M 300 250 Q 500 350 700 200" />
 
-  <div class="evidence" style="top:600px; left:600px;">
-    <img src="placeholder3.jpg">
-    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
-  </div>
+        </svg>
 
-</section>
 
-<!-- MODAL -->
-<div id="modal">
-  <div id="closeBtn" onclick="closeModal()">✕</div>
-  <img id="modalImg">
-</div>
 
-<script>
-document.addEventListener("keydown", e => {
-  if(e.key === "Enter"){
-    document.getElementById("boot").classList.remove("show");
-    document.getElementById("dashboard").classList.add("show");
-  }
-});
+        <div class="evidence-item" id="ev1" style="top: 150px; left: 200px; transform: rotate(-3deg);">
 
-function showBoard(){
-  document.getElementById("dashboard").classList.remove("show");
-  document.getElementById("board").classList.add("show");
-}
+            <div class="pushpin pin-red"></div>
 
-function backToDashboard(){
-  document.getElementById("board").classList.remove("show");
-  document.getElementById("dashboard").classList.add("show");
-}
+            <img src="https://via.placeholder.com/150/222/555?text=SUSPECT+01" alt="Smith">
 
-const items = document.querySelectorAll(".evidence img:not(.pin)");
-const modal = document.getElementById("modal");
-const modalImg = document.getElementById("modalImg");
+            <div style="margin-top: 10px; font-weight: bold; font-family: Courier, monospace; font-size: 0.9rem;">N. SMITH</div>
 
-items.forEach(img=>{
-  img.addEventListener("click", ()=>{
-    modal.style.display="flex";
-    modalImg.src = img.src;
-  });
-});
+        </div>
 
-function closeModal(){
-  modal.style.display="none";
-}
-</script>
+
+
+        <div class="evidence-item" id="ev2" style="top: 250px; left: 600px; transform: rotate(4deg);">
+
+            <div class="pushpin pin-green"></div>
+
+            <img src="https://via.placeholder.com/150/222/555?text=SUSPECT+02" alt="YBG">
+
+            <div style="margin-top: 10px; font-weight: bold; font-family: Courier, monospace; font-size: 0.9rem;">YBG / DETAIL</div>
+
+        </div>
+
+
+
+        <div class="evidence-item" style="top: 450px; left: 350px; transform: rotate(-2deg); background: #f4e870; padding: 20px; width: 180px;">
+
+            <div class="pushpin pin-red"></div>
+
+            <p style="font-family: 'Brush Script MT', cursive; font-size: 1.4rem; color: #111;">Who is greenlighting the drops?</p>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        // Boot Sequence Logic
+
+        let bootActive = true;
+
+        document.addEventListener('keydown', function(event) {
+
+            if (event.key === 'Enter' && bootActive) {
+
+                bootActive = false;
+
+                document.getElementById('enter-text').style.display = 'none';
+
+                document.getElementById('loading-container').style.display = 'block';
+
+                document.getElementById('loading-text').style.display = 'block';
+
+                
+
+                let progress = 0;
+
+                let interval = setInterval(() => {
+
+                    progress += Math.floor(Math.random() * 20) + 5;
+
+                    if (progress > 100) progress = 100;
+
+                    document.getElementById('progress').style.width = progress + '%';
+
+                    
+
+                    if (progress === 100) {
+
+                        clearInterval(interval);
+
+                        triggerGlitch('dashboard');
+
+                    }
+
+                }, 200);
+
+            }
+
+        });
+
+
+
+        // Navigation & Glitch Effect
+
+        function triggerGlitch(targetScreenId) {
+
+            const glitch = document.getElementById('glitch');
+
+            glitch.style.display = 'block';
+
+            
+
+            // Random chaotic flicker
+
+            setTimeout(() => { glitch.style.background = 'black'; }, 50);
+
+            setTimeout(() => { glitch.style.background = 'white'; }, 100);
+
+            setTimeout(() => { glitch.style.background = 'black'; }, 150);
+
+
+
+            setTimeout(() => {
+
+                glitch.style.display = 'none';
+
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+
+                document.getElementById(targetScreenId).classList.add('active-screen');
+
+                if(targetScreenId === 'evidence-screen') drawStrings(); // Redraw strings when board opens
+
+            }, 300);
+
+        }
+
+
+
+        function navigate(targetScreenId) {
+
+            triggerGlitch(targetScreenId);
+
+        }
+
+
+
+        // Evidence Zoom Interaction
+
+        const evidenceItems = document.querySelectorAll('.evidence-item');
+
+        const darkenBg = document.getElementById('darken-bg');
+
+        let currentlyZoomed = null;
+
+
+
+        evidenceItems.forEach(item => {
+
+            item.addEventListener('click', function(e) {
+
+                if (currentlyZoomed === this) {
+
+                    // Unzoom
+
+                    this.classList.remove('zoomed');
+
+                    darkenBg.style.display = 'none';
+
+                    currentlyZoomed = null;
+
+                } else {
+
+                    // Unzoom existing
+
+                    if (currentlyZoomed) currentlyZoomed.classList.remove('zoomed');
+
+                    
+
+                    // Zoom this
+
+                    this.classList.add('zoomed');
+
+                    darkenBg.style.display = 'block';
+
+                    currentlyZoomed = this;
+
+                }
+
+                e.stopPropagation();
+
+            });
+
+        });
+
+
+
+        // Click background to unzoom
+
+        darkenBg.addEventListener('click', () => {
+
+            if (currentlyZoomed) {
+
+                currentlyZoomed.classList.remove('zoomed');
+
+                darkenBg.style.display = 'none';
+
+                currentlyZoomed = null;
+
+            }
+
+        });
+
+
+
+        // Simple SVG String Drawer (Draws a curved line between ev1 and ev2)
+
+        function drawStrings() {
+
+            const ev1 = document.getElementById('ev1');
+
+            const ev2 = document.getElementById('ev2');
+
+            const stringPath = document.getElementById('string1');
+
+
+
+            const rect1 = ev1.getBoundingClientRect();
+
+            const rect2 = ev2.getBoundingClientRect();
+
+
+
+            // Calculate center points of the pushpins (roughly top-center of the evidence div)
+
+            const x1 = rect1.left + (rect1.width / 2);
+
+            const y1 = rect1.top + 15; 
+
+            const x2 = rect2.left + (rect2.width / 2);
+
+            const y2 = rect2.top + 15;
+
+
+
+            // Create a nice sagging curve
+
+            const midX = (x1 + x2) / 2;
+
+            const midY = ((y1 + y2) / 2) + 100; // +100 gives the string "gravity"
+
+
+
+            stringPath.setAttribute('d', `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
+
+        }
+
+        
+
+        // Redraw strings on window resize just in case
+
+        window.addEventListener('resize', drawStrings);
+
+    </script>
 
 </body>
+
 </html>
