@@ -2,14 +2,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Recruit Access Terminal</title>
-
+<title>FBI Recruit Terminal</title>
 <style>
 body {
   margin:0;
   font-family: Courier New, monospace;
-  background:#0b0f14;
-  color:#d6d6d6;
+  background:#000;
   overflow:hidden;
 }
 
@@ -18,7 +16,7 @@ body::after {
   content:"";
   position:fixed;
   inset:0;
-  background: repeating-linear-gradient(
+  background:repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,0.03),
     rgba(255,255,255,0.03) 1px,
@@ -28,16 +26,21 @@ body::after {
   pointer-events:none;
 }
 
-/* ================= BOOT SCREEN ================= */
-
-#boot {
+/* GLOBAL */
+section {
   position:absolute;
   inset:0;
+  display:none;
+}
+.show { display:block; }
+
+/* BOOT */
+#boot {
   background:#05070a;
-  display:flex;
-  flex-direction:column;
   justify-content:center;
   align-items:center;
+  display:flex;
+  flex-direction:column;
   text-align:center;
   animation:flicker 3s infinite;
 }
@@ -47,163 +50,104 @@ body::after {
   20%,24%,55% { opacity:.4; }
 }
 
-.logo {
+#boot .title {
   font-size:40px;
-  letter-spacing:6px;
-  margin-bottom:20px;
-  text-shadow:0 0 15px #4aff4a;
+  color:#7cff7c;
+  text-shadow:0 0 10px #4aff4a;
 }
-
-.adl {
+#boot .subtitle {
+  font-size:22px;
+  margin-top:10px;
+  color:#7cff7c;
+}
+#boot .adl {
   font-size:80px;
-  font-weight:bold;
-  letter-spacing:12px;
   opacity:.08;
   position:absolute;
-  bottom:40px;
+  bottom:20px;
 }
 
-.boot-text {
-  color:#7cff7c;
-  margin-top:10px;
-}
-
-/* ================= DASHBOARD ================= */
-
+/* DASHBOARD */
 #dashboard {
-  display:none;
-  position:absolute;
-  inset:0;
-  background:linear-gradient(#121821,#0b1016);
+  background:#0b0f14;
 }
-
 .header {
   padding:15px;
   background:#0f141b;
   border-bottom:1px solid #333;
-  font-size:18px;
 }
-
-.folders {
+.dashboard .folders {
   display:flex;
   justify-content:center;
-  gap:80px;
-  margin-top:120px;
+  gap:60px;
+  margin-top:80px;
 }
-
 .folder {
   text-align:center;
-  font-size:18px;
   cursor:pointer;
-  transition: all .3s ease;
+  transition:all .3s;
 }
-
-.folder-icon {
-  font-size:80px;
-}
-
 .folder:hover {
   transform:scale(1.2);
   color:#7cff7c;
-  text-shadow:0 0 15px #7cff7c;
 }
-
+.folder img {
+  width:90px;
+}
 .status {
   position:absolute;
   bottom:0;
-  width:100%;
-  background:#0f141b;
   padding:10px;
-  border-top:1px solid #333;
-  font-size:14px;
+  background:#0f141b;
+  width:100%;
 }
 
-/* ================= EVIDENCE BOARD ================= */
-
+/* BOARD */
 #board {
-  display:none;
-  position:absolute;
-  inset:0;
-  background:url("https://images.unsplash.com/photo-1582735689369-4fe89db7114c?q=80&w=2000") center/cover no-repeat;
+  background:url("board.jpg") center/cover no-repeat;
 }
-
-/* Dark cinematic lighting */
-#board::after {
-  content:"";
+#board .backBtn {
   position:absolute;
-  inset:0;
-  background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,.85));
-  pointer-events:none;
+  top:20px;
+  left:20px;
+  padding:8px 12px;
+  background:#111;
+  color:#7cff7c;
+  cursor:pointer;
 }
-
-/* Evidence items */
 .evidence {
   position:absolute;
-  background:#fdfdfd;
-  padding:10px;
-  box-shadow:0 20px 50px rgba(0,0,0,.8);
   cursor:pointer;
-  transition:.2s;
+  transition:.3s;
 }
-
 .evidence:hover {
-  transform:scale(1.05);
-  z-index:5;
+  transform:scale(1.1);
 }
-
 .evidence img {
-  width:200px;
+  width:180px;
   display:block;
 }
-
-/* Sticky note style */
-.sticky {
-  background:#ffef8a;
-  padding:15px;
-  font-size:14px;
-  width:180px;
-  box-shadow:0 15px 40px rgba(0,0,0,.6);
-}
-
-/* Pushpin */
 .pin {
-  width:14px;
-  height:14px;
-  background:red;
-  border-radius:50%;
+  width:30px;
   position:absolute;
-  top:-8px;
-  left:50%;
-  transform:translateX(-50%);
 }
 
-/* SVG strings */
-svg {
-  position:absolute;
-  width:100%;
-  height:100%;
-  pointer-events:none;
-}
-
-/* Modal zoom */
+/* MODAL */
 #modal {
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.9);
+  background:rgba(0,0,0,.85);
   justify-content:center;
   align-items:center;
 }
-
-#modal img, #modal .sticky {
+#modal img {
   max-width:70%;
-  box-shadow:0 25px 70px rgba(0,0,0,.9);
 }
-
-#close {
+#closeBtn {
   position:absolute;
-  top:40px;
-  right:50px;
+  top:30px;
+  right:40px;
   font-size:32px;
   cursor:pointer;
   color:white;
@@ -214,92 +158,114 @@ svg {
 <body>
 
 <!-- BOOT -->
-<div id="boot">
-  <div class="logo">FEDERAL BUREAU OF INVESTIGATION</div>
-  <div>RECRUIT ACCESS TERMINAL v2.3</div>
-  <div class="boot-text">AUTHORIZED PERSONNEL ONLY</div>
-  <div class="boot-text">Press ENTER to Continue</div>
+<section id="boot" class="show">
+  <div class="title">FEDERAL BUREAU OF INVESTIGATION</div>
+  <div class="subtitle">RECRUIT ACCESS TERMINAL v2.3</div>
+  <div class="subtitle">AUTHORIZED PERSONNEL ONLY</div>
+  <div class="subtitle">Press ENTER to Continue</div>
   <div class="adl">ADL</div>
-</div>
+</section>
 
 <!-- DASHBOARD -->
-<div id="dashboard">
+<section id="dashboard">
   <div class="header">F.B.I. RECRUIT OPERATIONS CENTER</div>
-
   <div class="folders">
-    <div class="folder">
-      <div class="folder-icon">📁</div>
+    <div class="folder" onclick="showBoard()">
+      <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png">
+      EVIDENCE
+    </div>
+    <div class="folder" onclick="alert('Case Files coming soon')">
+      <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png">
       CASE FILES
     </div>
-    <div class="folder">
-      <div class="folder-icon">📁</div>
-      PERSONS OF INTEREST
-    </div>
-    <div class="folder" onclick="openBoard()">
-      <div class="folder-icon">📁</div>
-      EVIDENCE BOARD
+    <div class="folder" onclick="alert('Persons coming soon')">
+      <img src="https://cdn-icons-png.flaticon.com/512/1250/1250920.png">
+      PERSONS
     </div>
   </div>
-
-  <div class="status">
-    USER: ROOKIE_032 | LAST LOGIN: 02/17/2006 | ACCESS LEVEL: RESTRICTED
-  </div>
-</div>
+  <div class="status">USER: ROOKIE_032 | LAST LOGIN: 02/17/2006 | ACCESS LEVEL: RESTRICTED</div>
+</section>
 
 <!-- EVIDENCE BOARD -->
-<div id="board">
+<section id="board">
+  <div class="backBtn" onclick="backToDashboard()">« BACK</div>
 
-  <svg>
-    <line x1="300" y1="200" x2="750" y2="400" stroke="red" stroke-width="3"/>
-    <line x1="750" y1="400" x2="500" y2="600" stroke="red" stroke-width="3"/>
+  <!-- STRING SVG -->
+  <svg style="position:absolute; width:100%; height:100%;">
+    <path d="M300 200 C 500 300, 600 350, 750 400" stroke="red" stroke-width="3" fill="none"/>
+    <path d="M750 400 C 600 550, 450 600, 500 550" stroke="red" stroke-width="3" fill="none"/>
   </svg>
 
-  <div class="evidence" style="top:150px; left:250px; transform:rotate(-4deg);">
-    <div class="pin"></div>
-    <img src="https://randomuser.me/api/portraits/men/32.jpg">
+  <!-- Evidence Items -->
+  <div class="evidence" style="top:150px; left:240px;">
+    <img src="Noah_Olivier_Smith.jpg">
+    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
   </div>
 
-  <div class="evidence" style="top:350px; left:700px; transform:rotate(5deg);">
-    <div class="pin"></div>
-    <img src="https://randomuser.me/api/portraits/men/45.jpg">
+  <div class="evidence" style="top:350px; left:680px;">
+    <img src="Luh_Yoni.jpg">
+    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
   </div>
 
-  <div class="evidence sticky" style="top:500px; left:400px; transform:rotate(-6deg);">
-    Suspect met with unidentified individual at 11:47 PM.  
-    Possible link to Captain-level operations.
+  <div class="evidence" style="top:520px; left:420px;">
+    <img src="BNYX.jpg">
+    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
   </div>
 
-</div>
+  <div class="evidence" style="top:250px; left:480px;">
+    <img src="ZB.jpg">
+    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
+  </div>
+
+  <div class="evidence" style="top:170px; left:580px;">
+    <img src="placeholder1.jpg">
+    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
+  </div>
+
+  <div class="evidence" style="top:420px; left:300px;">
+    <img src="placeholder2.jpg">
+    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
+  </div>
+
+  <div class="evidence" style="top:600px; left:600px;">
+    <img src="placeholder3.jpg">
+    <img class="pin" src="pin-red.png" style="left:-16px; top:-18px;">
+  </div>
+
+</section>
 
 <!-- MODAL -->
 <div id="modal">
-  <div id="close" onclick="closeModal()">✕</div>
+  <div id="closeBtn" onclick="closeModal()">✕</div>
   <img id="modalImg">
 </div>
 
 <script>
-document.addEventListener("keydown", function(e){
-  if(e.key==="Enter"){
-    document.getElementById("boot").style.display="none";
-    document.getElementById("dashboard").style.display="block";
+document.addEventListener("keydown", e => {
+  if(e.key === "Enter"){
+    document.getElementById("boot").classList.remove("show");
+    document.getElementById("dashboard").classList.add("show");
   }
 });
 
-function openBoard(){
-  document.getElementById("dashboard").style.display="none";
-  document.getElementById("board").style.display="block";
+function showBoard(){
+  document.getElementById("dashboard").classList.remove("show");
+  document.getElementById("board").classList.add("show");
 }
 
-const items = document.querySelectorAll(".evidence");
+function backToDashboard(){
+  document.getElementById("board").classList.remove("show");
+  document.getElementById("dashboard").classList.add("show");
+}
+
+const items = document.querySelectorAll(".evidence img:not(.pin)");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
 
-items.forEach(item=>{
-  item.addEventListener("click",()=>{
-    if(item.querySelector("img")){
-      modal.style.display="flex";
-      modalImg.src = item.querySelector("img").src;
-    }
+items.forEach(img=>{
+  img.addEventListener("click", ()=>{
+    modal.style.display="flex";
+    modalImg.src = img.src;
   });
 });
 
